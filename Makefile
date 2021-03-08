@@ -1,6 +1,6 @@
 # Makefile
 # Author: Maxwell SLingerland
-# Date: Mar 5, 2020
+# Date: Mar 7, 2020
 #
 # COSC 3750, Homework 5
 #

@@ -1,19 +1,7 @@
 /*
 * wyls.c
 * Author: Maxwell SLingerland
-* Date: Mar 5, 2020
-*
-* COSC 3750, Homework 5
-*
-* This is a simple version of the ls utility. It is designed to
-* print out the files of the directory
-* and information on those files
-*/
-
-/*
-* wyls.c
-* Author: Maxwell SLingerland
-* Date: Mar 5, 2020
+* Date: Mar 7, 2020
 *
 * COSC 3750, Homework 5
 *
@@ -31,6 +19,7 @@
 #include<time.h>
 #include <inttypes.h> 
 #include<stdbool.h>
+#include<string.h>
 
 void humanSize(double size) 
 {
@@ -130,7 +119,11 @@ int main(int argc, const char *argv[])
    {
        ls(".");
    }
-   else if(argc >= 2)
+   if(argc == 2)
+   {
+       ls(argv[argc-1]);
+   }
+   else if(argc > 2)
    {
       for(int i=1; i<argc; i++)
       {
@@ -157,7 +150,6 @@ int main(int argc, const char *argv[])
               c += 1;
           }
       }
-
       if(op_h == 1 && op_n == 0)
       {
           if((argc - c) == 0)

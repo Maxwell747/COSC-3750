@@ -1,10 +1,22 @@
 /*
 * hw5_pcode.txt
 * Author: Maxwell SLingerland
-* Date: Mar 5, 2020
+* Date: Mar 7, 2020
 *
 * COSC 3750, Homework 5
 *
 * psuedocode for wyls.c
 */
 
+check to see how many arguments
+if none print current directory
+if there are determine if "-n", "-h", "-nh", "-hn", "-n -h", "-h -n"
+check if another directory if specified
+
+check if directory is valid
+ignore hidden files
+print permissions, uid, gid, size(dependent on h)
+print date last modified(use strftime and localtime)
+print name of files
+
+create 2 functions to print out info(one with and one without options)
