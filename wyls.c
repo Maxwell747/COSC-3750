@@ -10,6 +10,18 @@
 * and information on those files
 */
 
+/*
+* wyls.c
+* Author: Maxwell SLingerland
+* Date: Mar 5, 2020
+*
+* COSC 3750, Homework 5
+*
+* This is a simple version of the ls utility. It is designed to
+* print out the files of the directory
+* and information on those files
+*/
+
 #include<stdio.h>
 #include<dirent.h>
 #include<stdlib.h>
@@ -17,7 +29,21 @@
 #include<sys/stat.h>
 #include<sys/types.h>
 #include<time.h>
-#include <inttypes.h>
+#include <inttypes.h> 
+#include<stdbool.h>
+
+void humanSize(double size) 
+{
+    int i = 0;
+    char buf[10];
+    const char* units[] = {"", "K", "M", "G"};
+    while (size >= 1024 && i+1<4) {
+        size /= 1024;
+        i++;
+    }
+    sprintf(buf, "%.*f%s",i, size, units[i]);
+    printf("%*s",6,buf);
+}
 
 void ls(const char *d)
 {
@@ -38,10 +64,11 @@ void ls(const char *d)
     closedir(dir);
 }
 
-void ls_n(const char *d)
+void ls_n(const char *d, int h)
 {
     struct dirent *files;
     struct stat stats;
+    char date[50];
     DIR *dir = opendir(d);
     if(dir == NULL)
     {
@@ -53,8 +80,15 @@ void ls_n(const char *d)
         {
             continue;
         }
-        char date[100] = "";
-        strftime(date, 100, "%m %d %H:%M", localtime(stats.st_mtime));
+        stat(files->d_name,&stats);
+        strftime(date, 50, "%b %d %H:%M", localtime(&stats.st_mtime));
+        time_t rawTime;
+        time(&rawTime);
+        if((rawTime - stats.st_mtime) > 15552000)
+        {
+            strftime(date, 50, "%b %d  %Y", localtime(&stats.st_mtime));
+        }
+        
         printf( (S_ISDIR(stats.st_mode)) ? "d" : "-");
         printf( (stats.st_mode & S_IRUSR) ? "r" : "-");
         printf( (stats.st_mode & S_IWUSR) ? "w" : "-");
@@ -66,11 +100,18 @@ void ls_n(const char *d)
         printf( (stats.st_mode & S_IWOTH) ? "w" : "-");
         printf( (stats.st_mode & S_IXOTH) ? "x" : "-");
         printf(" ");
-        //printf("%s",getpwnam(stats.st_uid));
+        printf("%d",stats.st_uid);
         printf(" ");
-        printf("%s",getgrnam(stats.st_gid));
+        printf("%d",stats.st_gid);
         printf(" ");
-        printf("%d",stats.st_size);
+        if(h == 1)
+        {
+            humanSize(stats.st_size);
+        }
+        else
+        {
+            printf("%*ld",6,stats.st_size);
+        }
         printf(" ");
         printf("%s",date);
         printf(" ");
@@ -79,43 +120,68 @@ void ls_n(const char *d)
     }
     closedir(dir);
 }
-/*
-const char humanSize(uint64_t size)
-{
-	char *suffix[] = {"", "KB", "MB", "GB"};
-	char length = sizeof(suffix) / sizeof(suffix[0]);
-
-	int i = 0;
-	double dblBytes = size;
-
-	if (size > 1024) 
-    {
-		for (i = 0; (size / 1024) > 0 && i<length-1; i++, size /= 1024)
-			dblBytes = size / 1024.0;
-	}
-
-	static char output[200];
-	sprintf(output, "%.02lf %s", dblBytes, suffix[i]);
-	return output;
-}*/
 
 int main(int argc, const char *argv[])
 {
-   
+   int op_h = 0;
+   int op_n = 0;
+   int c = 1;
    if(argc == 1)
    {
        ls(".");
    }
    else if(argc >= 2)
    {
-       if(argv[1][0] == '-')
-       {
-           ls_n(".");
-       }
-       else
-       {
-           ls(argv[1]);
-       }
+      for(int i=1; i<argc; i++)
+      {
+          if (0 == strcmp(argv[i], "-n"))
+          {
+              op_n = 1;
+              c += 1;
+          }
+          else if (0 == strcmp(argv[i], "-h"))
+          {
+              op_h = 1;
+              c += 1;
+          }
+          else if (0 == strcmp(argv[i], "-nh"))
+          {
+              op_h = 1;
+              op_n = 1;
+              c += 1;
+          }
+          else if (0 == strcmp(argv[i], "-hn"))
+          {
+              op_h = 1;
+              op_n = 1;
+              c += 1;
+          }
+      }
+
+      if(op_h == 1 && op_n == 0)
+      {
+          if((argc - c) == 0)
+          {
+              ls(".");
+          }
+          else
+          {
+              ls(argv[argc-1]);
+          }
+      }
+      else
+      {
+          if((argc - c) == 0)
+          {
+              ls_n(".",op_h);
+          }
+          else
+          {
+              ls_n(argv[argc-1],op_h);
+          }
+          
+      }
    }
+   
    return 0;
 }
